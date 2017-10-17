@@ -1,5 +1,5 @@
 ---
-title: "Week 7 Homework: Writing a Kriging function"
+title: "Homework 7: Writing a Kriging function"
 output: pdf_document
 ---
 ```{r global_options, echo=FALSE, results='asis'}
@@ -7,12 +7,9 @@ knitr::opts_chunk$set(fig.width=12, fig.height=8, fig.path='Figs/',  warning=FAL
 rm(list=ls())
 ```
 
-**Note:** I used some equations in the description of this homework. To view them clearly, please click the 'knit' button on the top of this window. In case you have problem with the knitting, a pdf file is also enclosed ('homework.pdf') for you.
-
-
 The following simple table contains measurements at $10$ locations $z(s_i),
 i = 1,\dots 10$, and we need to make estimation of a target location
-($z(s_{11})$, red star point) using kriging. 
+($z(s_{11})$, red point) using kriging.
 
 ```{r hw, eval=T, echo=F}
 
@@ -38,15 +35,14 @@ Assume that we know the mean of the observations is $0$. As mentioned in
 the class, simple kriging can be used to make this estimation. We have
 learned that, with a specification of covariogram/variogram $\gamma(h)$,
 the kriging weights can be obtained by $\omega=\sum_{dd}^{-1}\sigma_{dt}$,
-where the $\omega$ is the vector of kriging weights, $\sum_{dd}$ is the 
-covariance matrix of the observation specified by $\gamma(h)$, and $\sigma_{dt}$
-indicates the covariance vector between the targeted location and the
-observations. The kriging estimation can then been given as 
-$\hat{z}(s_{11})=\sum_{i=1}^{10}\omega_{i}z(s_i)$ and the associated variance is
-$\hat{\sigma}(s_{11})=\sigma(0) - 
-\sum_{i=1}^{10}\omega_{i}\sigma(|s_{11}-s_{i}|)$, where $\sigma(0)$ is the
-variance of the $z(s_i), i = 1, \dots, 10$. With these, please finish the
-following two questions.
+where the $\omega$ is the vector of kriging weights, $\sum_{dd}$ is the
+covariance matrix of the observation specified by $\gamma(h)$, and
+$\sigma_{dt}$ indicates the covariance vector between the targeted location
+and the observations. The kriging estimation can then been given as
+$\hat{z}(s_{11})=\sum_{i=1}^{10}\omega_{i}z(s_i)$ and the associated
+variance is $\hat{\sigma}(s_{11})=\sigma(0) -
+\sum_{i=1}^{10}\omega_{i}\sigma(|s_{11}-s_{i}|)$. With these, please finish
+the following two questions. 
 
 # Question 1
 
@@ -55,9 +51,7 @@ R block.
 
 ```{r hw2, eval=T, echo=T}
 
-# this is a function to return the value of exponential covariogram based on 
-#the input distance. The covariogram parameters have been specified. 
-
+# this is a function to return the value of exponential covariogram based on the input distance. The covariogram parameters have been specified. 
 expVariogram<-function(distance){
     nugget=0; sill=2000; range=20000
     return (nugget+sill*exp(-3*distance/range))
@@ -87,10 +81,10 @@ kriging<-function(object, location){
 	}
 	#######################################################
 	## Here, please add your code to convert the distance matrix to covariance
-	## matrix (Hint: use the provided covariogram function *expVariogram()*)
+	## matrix
+         C<-expVariogram(dist)        
 
-
-  ## 
+        ## 
 	######################################################
 
 
@@ -101,9 +95,8 @@ kriging<-function(object, location){
 
 	#######################################################
 	## Here, please add your code to convert the distance vector between target
-	# and observations to the vector of covariance (Hint: use the provided covariogram 
-	# function *expVariogram()*)
-
+	# and observations to the vector of covariance 
+         c<-expVariogram(dist2)
         #
 	#######################################################
 
@@ -119,12 +112,14 @@ kriging<-function(object, location){
 	# variance based on the weight `w`
 
 	zhat <- 0 # Initilized as 0
+        zhat<-sum(w*object$value)
 
-  #
+        #
 	#######################################################
 
 	return (zhat)
 }
+
 ```
 
 # Question 2
@@ -134,5 +129,14 @@ make estimation at the $10$ observed locations and compare the difference
 between your estimation and the observations. What do you find from the
 difference?
 
+```{r q2, echo=T, eval=T}
+
+diff=rep(0,nrow(object))
+for (i in 1:nrow(object)){
+location=c(object[i,1], object[i,2])
+diff[i]=kriging(object,location)-object[i,3]
+}
+
+```
 
 
